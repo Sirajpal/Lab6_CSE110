@@ -24,6 +24,11 @@ function getRecipesFromStorage() {
   // A9. TODO - Complete the functionality as described in this function
   //           header. It is possible in only a single line, but should
   //           be no more than a few lines.
+
+  if(localStorage.length == 0) {
+    let empty_array = [];
+    return empty_array;
+  }
   return JSON.parse(localStorage.getItem('recipes'));
 }
 
@@ -41,6 +46,9 @@ function addRecipesToDocument(recipes) {
   //            create a <recipe-card> element for each one, and populate
   //            each <recipe-card> with that recipe data using element.data = ...
   //            Append each element to <main>
+  if(recipes == null) {
+    return;
+  }
   for( let i = 0; i < recipes.length; i++) {
     let newRecipe = document.createElement('recipe-card');
     newRecipe.data = recipes[i];
@@ -93,26 +101,61 @@ function initFormHandler() {
   // B13. TODO - Delete the contents of <main>
   let sub_button = document.querySelector("[type='submit']");
   sub_button.addEventListener("click", function ()  {
-      let main = document.querySelector('main');
+    let main = document.querySelector('main');
+
       const form_data = new FormData(elment_form);
-      let recipe_object = {};
-      recipe_object.imgSrc = form_data.get("imgSrc");
-      recipe_object.imgAlt = form_data.get("imgAlt");
-      recipe_object.titleLnk = form_data.get("titleLnk");
-      recipe_object.titleTxt = form_data.get("titleTxt");
-      recipe_object.rating = form_data.get("rating");
-      recipe_object.numRatings = form_data.get("numRatings");
-      recipe_object.organization = form_data.get("organization");
-      recipe_object.lengthTime = form_data.get("lengthTime");
-      recipe_object.ingredients = form_data.get("ingredients");
+      if(form_data.entries().next().done) {
+        console.log("invalid input");
+        return;
+      }
+      let recipe_object = {};      
+      if(form_data.get("imgSrc") != "") {
+        console.log("it went into this loop");
+        recipe_object["imgSrc"] = form_data.get("imgSrc");
+      }
+      if(form_data.get("imgAlt") != "") {
+        recipe_object["imgAlt"] = form_data.get("imgAlt");
+      }
+      if(form_data.get("titleLnk") != "") {
+        recipe_object["titleLnk"]= form_data.get("titleLnk");
+      }
+      if(form_data.get("titleTxt") != "") {
+        recipe_object["titleTxt"] = form_data.get("titleTxt");
+      }
+      if(form_data.get("rating") != null) {
+        recipe_object["rating"] = form_data.get("rating");      
+      }
+      if(form_data.get("numRatings") != "") {
+        recipe_object["numRatings"] = form_data.get("numRatings");
+      }
+      if(form_data.get("organization") != "") {
+        recipe_object["organization"] = form_data.get("organization");      
+      }
+      if(form_data.get("lengthTime") != "") {
+        recipe_object["lengthTime"] = form_data.get("lengthTime");
+      }
+      if(form_data.get("ingredients") != "") {
+        recipe_object["ingredients"] = form_data.get("ingredients");
+      }
 
-      let recipe_inputted = document.createElement('recipe-card');
-      recipe_inputted.data = recipe_object;
-      main.append(recipe_inputted);
+      if(JSON.stringify(recipe_object) == "{}") {
+        console.log("Invalid input");
+      } else {
 
-      let recipes_storage = getRecipesFromStorage();
+          let recipe_inputted = document.createElement('recipe-card');
+          let recipes_storage = getRecipesFromStorage();
+          recipes_storage.push(recipe_object);
+          saveRecipesToStorage(recipes_storage);
 
-      recipes_storage.push(recipe_inputted);
-      saveRecipesToStorage(recipes_storage);
+          recipe_inputted.data = recipe_object;
+          main.append(recipe_inputted);  
+      }
+  });
+
+  let clear_storage_button = document.querySelector("[type='button']");
+  clear_storage_button.addEventListener("click", function ()  {
+    let main = document.querySelector('main');
+      localStorage.clear();
+      main.replaceChildren();
   });
 }
